@@ -4,16 +4,11 @@ const itemList = document.getElementById("app__item-list");
 const addBtn = document.getElementById("add");
 const delBtn = document.getElementById("del");
 
-localStorage.items;
-
 document.addEventListener("DOMContentLoaded", function () {
   checkStorage();
 
   function checkStorage() {
-    if (localStorage.items === undefined) {
-      console.log("localStorage пуст");
-    } else {
-      console.log("Не пуст, заполняем");
+    if (localStorage.items !== undefined) {
       parsedItems = JSON.parse(localStorage.items);
       parsedItems.forEach((el) => {
         appendItem(el);
@@ -30,6 +25,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.id = "label-" + el[0];
+    console.log(el[2]);
+    checkbox.checked = el[2];
+    checkbox.addEventListener("change", (e) => {
+      parsedItems = JSON.parse(localStorage.items);
+      let key = parsedItems.find(
+        (item) => item[0] == e.target.parentElement.id
+      );
+      let index = parsedItems.indexOf(key);
+      parsedItems[index][2] = e.target.checked;
+      localStorage.items = JSON.stringify(parsedItems);
+    });
     tempItem.append(checkbox);
     // and lable
     const label = document.createElement("label");
@@ -43,8 +49,16 @@ document.addEventListener("DOMContentLoaded", function () {
     delBtn.className = "app__delete-item";
     delBtn.innerText = "×";
     delBtn.addEventListener("click", (e) => {
+      parsedItems = JSON.parse(localStorage.items);
+      let key = parsedItems.find(
+        (item) => item[0] == e.target.parentElement.id
+      );
+      parsedItems.splice(parsedItems.indexOf(key), 1);
+      localStorage.items = JSON.stringify(parsedItems);
+
       e.target.parentElement.remove();
     });
+
     tempItem.append(delBtn);
 
     // append to list
@@ -67,10 +81,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (input.value.length) {
       let val = input.value;
       const stamp = Date.now();
-      let tempArr = toArr(stamp, val);
+      let checkboxState = false;
+      let tempArr = toArr(stamp, val, checkboxState);
 
-      function toArr(id, value) {
-        return [id, value];
+      function toArr(id, value, checkboxState) {
+        return [id, value, checkboxState];
       }
 
       if (localStorage.items === undefined) {
@@ -87,5 +102,3 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 });
-
-// localStorage.items = 1;
