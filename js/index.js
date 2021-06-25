@@ -13,7 +13,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (localStorage.items === undefined) {
       console.log("localStorage пуст");
     } else {
-      console.log("Не пуст");
+      console.log("Не пуст, заполняем");
+      parsedItems = JSON.parse(localStorage.items);
+      parsedItems.forEach((el) => {
+        appendItem(el);
+      });
     }
   }
   function appendItem(el) {
@@ -63,25 +67,22 @@ document.addEventListener("DOMContentLoaded", function () {
     if (input.value.length) {
       let val = input.value;
       const stamp = Date.now();
-      let a = toArr(stamp, val);
+      let tempArr = toArr(stamp, val);
 
       function toArr(id, value) {
         return [id, value];
       }
-      let arr = [];
-      arr.push(a);
 
       if (localStorage.items === undefined) {
-        localStorage.items = JSON.stringify(arr);
+        localStorage.items = JSON.stringify([tempArr]);
+        appendItem(tempArr);
       } else {
         parsedItems = JSON.parse(localStorage.items);
-        parsedItems.push(arr);
+        parsedItems.push(tempArr);
         localStorage.items = JSON.stringify(parsedItems);
-
-        console.log(a);
+        appendItem(tempArr);
       }
 
-      appendItem(a);
       input.value = "";
     }
   }
