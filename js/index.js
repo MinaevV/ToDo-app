@@ -4,8 +4,19 @@ const itemList = document.getElementById("app__item-list");
 const addBtn = document.getElementById("add");
 const delBtn = document.getElementById("del");
 
+const allFilter = document.getElementById("all");
+const completedFilter = document.getElementById("completed");
+const activeFilter = document.getElementById("active");
+
 document.addEventListener("DOMContentLoaded", function () {
-  checkStorage();
+  // checkStorage();
+  if (localStorage.filter !== undefined) {
+    filter(localStorage.filter);
+    let radio = document.getElementById(`${localStorage.filter}`);
+    radio.checked = true;
+  } else {
+    filter();
+  }
 
   function checkStorage() {
     if (localStorage.items !== undefined) {
@@ -15,6 +26,43 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
   }
+
+  function filter(passed) {
+    if (passed === undefined) {
+      localStorage.filter = "all";
+      itemList.setAttribute("filter", localStorage.filter);
+    } else {
+      itemList.innerHTML = '';
+      localStorage.filter = passed;
+      itemList.setAttribute("filter", passed);
+
+      parsedItems = JSON.parse(localStorage.items);
+
+
+      switch (passed) {
+        case "all":
+            checkStorage();
+          break;
+
+        case "completed":
+          for (let item of parsedItems) {
+            if (item[2] === true) {
+              appendItem(item);
+            }
+          }
+          break;
+
+        case "active":
+          for (let item of parsedItems) {
+            if (item[2] === false) {
+              appendItem(item);
+            }
+          }
+          break;
+      }
+    }
+  }
+
   function appendItem(el) {
     // create item
     const tempItem = document.createElement("div");
@@ -25,7 +73,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.id = "label-" + el[0];
-    console.log(el[2]);
     checkbox.checked = el[2];
     checkbox.addEventListener("change", (e) => {
       parsedItems = JSON.parse(localStorage.items);
@@ -34,7 +81,9 @@ document.addEventListener("DOMContentLoaded", function () {
       );
       let index = parsedItems.indexOf(key);
       parsedItems[index][2] = e.target.checked;
+      
       localStorage.items = JSON.stringify(parsedItems);
+      filter(localStorage.filter);
     });
     tempItem.append(checkbox);
     // and lable
@@ -65,6 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (document.contains(document.getElementById("app__item-list"))) {
       itemList.append(tempItem);
     }
+    
+    return (checkboxes = document.querySelectorAll("div.app__item input"));
   }
 
   app.addEventListener("keydown", (e) => {
@@ -75,6 +126,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
   addBtn.addEventListener("click", (e) => {
     validation();
+  });
+
+  allFilter.addEventListener("click", () => {
+    filter("all");
+  });
+  
+  completedFilter.addEventListener("click", () => {
+    filter("completed");
+  });
+
+  activeFilter.addEventListener("click", () => {
+    filter("active");
   });
 
   function validation() {
@@ -96,6 +159,8 @@ document.addEventListener("DOMContentLoaded", function () {
         parsedItems.push(tempArr);
         localStorage.items = JSON.stringify(parsedItems);
         appendItem(tempArr);
+  filter(localStorage.filter);
+
       }
 
       input.value = "";

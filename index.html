@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style/style.css" />
     <title>To Do</title>
   </head>
+
   <body>
     <div class="container">
       <div class="app">
@@ -22,7 +23,17 @@
             <input type="button" value="Add" id="add" />
           </fieldset>
 
-          <div id="app__item-list" class="app__item-list">
+          <div id="app__item-list" class="app__item-list"></div>
+
+          <div class="app__filters">
+            <fieldset>
+              <input type="radio" name="filter" id="all" />
+              <label for="all">all</label>
+              <input type="radio" name="filter" id="completed" />
+              <label for="completed">completed</label>
+              <input type="radio" name="filter" id="active" />
+              <label for="active">active</label>
+            </fieldset>
           </div>
         </div>
       </div>
