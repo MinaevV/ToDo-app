@@ -3,24 +3,24 @@ const input = document.getElementById("app__input");
 const itemList = document.getElementById("app__item-list");
 const addBtn = document.getElementById("add");
 const delBtn = document.getElementById("del");
+const clearBtn = document.getElementById("clear");
 
 const allFilter = document.getElementById("all");
 const completedFilter = document.getElementById("completed");
 const activeFilter = document.getElementById("active");
 
 document.addEventListener("DOMContentLoaded", function () {
-  // checkStorage();
-  if (localStorage.filter !== undefined) {
-    filter(localStorage.filter);
-    let radio = document.getElementById(`${localStorage.filter}`);
+  if (readLS("filter") !== undefined) {
+    filter(readLS("filter"));
+    const radio = document.getElementById(`${readLS("filter")}`);
     radio.checked = true;
   } else {
     filter();
   }
 
   function checkStorage() {
-    if (localStorage.items !== undefined) {
-      parsedItems = JSON.parse(localStorage.items);
+    if (readLS("items")) {
+      parsedItems = parse("items");
       parsedItems.forEach((el) => {
         appendItem(el);
       });
@@ -28,35 +28,42 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function filter(passed) {
-    if (passed === undefined) {
-      localStorage.filter = "all";
-      itemList.setAttribute("filter", localStorage.filter);
+    if (!passed) {
+      writeLS("filter", "all");
+      const radio = document.getElementById(`${localStorage.filter}`);
+      radio.checked = true;
+      itemList.setAttribute("filter", readLS("filter"));
     } else {
-      itemList.innerHTML = '';
-      localStorage.filter = passed;
+      itemList.innerHTML = "";
+      writeLS("filter", `${passed}`);
       itemList.setAttribute("filter", passed);
 
-      parsedItems = JSON.parse(localStorage.items);
-
+      if (readLS("items")) {
+        parsedItems = parse("items");
+      }
 
       switch (passed) {
         case "all":
-            checkStorage();
+          checkStorage();
           break;
 
         case "completed":
-          for (let item of parsedItems) {
-            if (item[2] === true) {
-              appendItem(item);
-            }
+          if (readLS("items")) {
+            parsedItems.forEach((item) => {
+              if (item.status) {
+                appendItem(item);
+              }
+            });
           }
           break;
 
         case "active":
-          for (let item of parsedItems) {
-            if (item[2] === false) {
-              appendItem(item);
-            }
+          if (readLS("items")) {
+            parsedItems.forEach((item) => {
+              if (!item.status) {
+                appendItem(item);
+              }
+            });
           }
           break;
       }
@@ -67,29 +74,29 @@ document.addEventListener("DOMContentLoaded", function () {
     // create item
     const tempItem = document.createElement("div");
     tempItem.className = "app__item";
-    tempItem.id = el[0];
+    tempItem.id = el.id;
 
     // fill item with checkbox
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.id = "label-" + el[0];
-    checkbox.checked = el[2];
+    checkbox.id = "label-" + el.id;
+    checkbox.checked = el.status;
     checkbox.addEventListener("change", (e) => {
-      parsedItems = JSON.parse(localStorage.items);
-      let key = parsedItems.find(
-        (item) => item[0] == e.target.parentElement.id
+      parsedItems = parse("items");
+      const key = parsedItems.find(
+        (item) => item.id == e.target.parentElement.id
       );
-      let index = parsedItems.indexOf(key);
-      parsedItems[index][2] = e.target.checked;
-      
-      localStorage.items = JSON.stringify(parsedItems);
-      filter(localStorage.filter);
+      const index = parsedItems.indexOf(key);
+      parsedItems[index].status = e.target.checked;
+
+      writeLS("items", `${JSON.stringify(parsedItems)}`);
+      filter(readLS("filter"));
     });
     tempItem.append(checkbox);
     // and lable
     const label = document.createElement("label");
-    label.htmlFor = "label-" + el[0];
-    label.innerText = el[1];
+    label.htmlFor = "label-" + el.id;
+    label.innerText = el.value;
     tempItem.append(label);
 
     // add delBtn
@@ -98,12 +105,12 @@ document.addEventListener("DOMContentLoaded", function () {
     delBtn.className = "app__delete-item";
     delBtn.innerText = "×";
     delBtn.addEventListener("click", (e) => {
-      parsedItems = JSON.parse(localStorage.items);
-      let key = parsedItems.find(
-        (item) => item[0] == e.target.parentElement.id
+      parsedItems = parse("items");
+      const key = parsedItems.find(
+        (item) => item.id == e.target.parentElement.id
       );
       parsedItems.splice(parsedItems.indexOf(key), 1);
-      localStorage.items = JSON.stringify(parsedItems);
+      writeLS("items", JSON.stringify(parsedItems));
 
       e.target.parentElement.remove();
     });
@@ -114,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (document.contains(document.getElementById("app__item-list"))) {
       itemList.append(tempItem);
     }
-    
+
     return (checkboxes = document.querySelectorAll("div.app__item input"));
   }
 
@@ -124,14 +131,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  addBtn.addEventListener("click", (e) => {
-    validation();
-  });
+  // addBtn.addEventListener("click", (e) => {
+  //   validation();
+  // });
 
   allFilter.addEventListener("click", () => {
     filter("all");
   });
-  
+
   completedFilter.addEventListener("click", () => {
     filter("completed");
   });
@@ -140,30 +147,55 @@ document.addEventListener("DOMContentLoaded", function () {
     filter("active");
   });
 
+  clearBtn.addEventListener("click", () => {
+    itemList.innerHTML = "";
+
+    parsedItems = parse("items");
+
+    parsedItems = parsedItems.filter((item) => !item.status);
+    console.log(parsedItems);
+    writeLS("items", JSON.stringify(parsedItems));
+    checkStorage();
+    filter(readLS("filter"));
+  });
+
   function validation() {
     if (input.value.length) {
-      let val = input.value;
+      const val = input.value;
       const stamp = Date.now();
-      let checkboxState = false;
-      let tempArr = toArr(stamp, val, checkboxState);
+      const status = false;
+      const tempObj = toObj(stamp, val, status);
 
-      function toArr(id, value, checkboxState) {
-        return [id, value, checkboxState];
+      function toObj(id, value, status) {
+        return { id: id, value: value, status: status };
       }
 
-      if (localStorage.items === undefined) {
-        localStorage.items = JSON.stringify([tempArr]);
-        appendItem(tempArr);
+      if (!readLS("items")) {
+        writeLS("items", JSON.stringify([tempObj]));
+        appendItem(tempObj);
       } else {
-        parsedItems = JSON.parse(localStorage.items);
-        parsedItems.push(tempArr);
-        localStorage.items = JSON.stringify(parsedItems);
-        appendItem(tempArr);
-  filter(localStorage.filter);
-
+        parsedItems = parse("items");
+        parsedItems.push(tempObj);
+        writeLS("items", JSON.stringify(parsedItems));
+        appendItem(tempObj);
+        filter(readLS("filter"));
       }
 
       input.value = "";
     }
+  }
+
+  function parse(item) {
+    try {
+      return JSON.parse(localStorage.getItem(`${item}`));
+    } catch (error) {}
+  }
+
+  function writeLS(el, val) {
+    localStorage.setItem(`${el}`, val);
+  }
+
+  function readLS(el) {
+    return localStorage.getItem(el);
   }
 });
