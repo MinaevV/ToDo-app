@@ -11,7 +11,7 @@
   <body>
     <div class="container">
       <div class="app">
-        <h1>To Do</h1>
+        <h1>todos</h1>
         <div id="app" class="app__body">
           <fieldset>
             <input
@@ -24,31 +24,24 @@
           </fieldset>
 
           <div id="app__item-list" class="app__item-list">
-            <div class="app__item" id="1624895395285">
-              <input type="checkbox" id="label-1624895395285">
-              <label for="label-1624895395285">1</label>
-              <div id="del" class="app__delete-item">×</div></div>
           </div>
 
+          <div class="app__controls">
+          <div id="app__item-count"></div>
+            
           <div class="app__filters">
-            <fieldset>
-              <input type="radio" name="filter" id="all" />
-              <label for="all">All</label>
-
-              <input type="radio" name="filter" id="completed" />
-              <label for="completed">Done</label>
-
-              <input type="radio" name="filter" id="active" />
-              <label for="active">Active</label>
-            </fieldset>
+            <input type="button" name="filter" value="All" id="all" />
+            <input type="button" name="filter" value="Completed" id="completed" />
+            <input type="button" name="filter" value="Active" id="active" />
           </div>
+
           <input 
             type="button"
             name="clear"
-            value="Clear"
+            value="Clear completed"
             id="clear"
           >
-          
+        </div>
 
         </div>
         </div>

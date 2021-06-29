@@ -4,6 +4,9 @@ const itemList = document.getElementById("app__item-list");
 const addBtn = document.getElementById("add");
 const delBtn = document.getElementById("del");
 const clearBtn = document.getElementById("clear");
+let count = document.getElementById("app__item-count");
+let filterList = document.querySelectorAll(".app__filters > *");
+let listHeight = `${itemList.offsetHeight}px`;
 
 const allFilter = document.getElementById("all");
 const completedFilter = document.getElementById("completed");
@@ -24,7 +27,32 @@ document.addEventListener("DOMContentLoaded", function () {
       parsedItems.forEach((el) => {
         appendItem(el);
       });
+      counter();
     }
+  }
+
+  function counter() {
+    if (readLS("items")) {
+      let i = 0;
+      parsedItems = parse("items");
+      parsedItems.forEach((item) => {
+        if (!item.status) {
+          ++i;
+        }
+      });
+      count.innerHTML = `${i} left`;
+    } else {
+      count.innerHTML = "0 left";
+    }
+  }
+
+  function checkFilter(e) {
+    filterList.forEach((item) => {
+      item.classList.remove("__active");
+      if (item === e.currentTarget) {
+        item.classList.add("__active");
+      }
+    });
   }
 
   function filter(passed) {
@@ -33,6 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const radio = document.getElementById(`${localStorage.filter}`);
       radio.checked = true;
       itemList.setAttribute("filter", readLS("filter"));
+      allFilter.classList.add("__active");
     } else {
       itemList.innerHTML = "";
       writeLS("filter", `${passed}`);
@@ -45,6 +74,7 @@ document.addEventListener("DOMContentLoaded", function () {
       switch (passed) {
         case "all":
           checkStorage();
+          allFilter.classList.add("__active");
           break;
 
         case "completed":
@@ -55,6 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
               }
             });
           }
+          completedFilter.classList.add("__active");
           break;
 
         case "active":
@@ -65,6 +96,8 @@ document.addEventListener("DOMContentLoaded", function () {
               }
             });
           }
+          activeFilter.classList.add("__active");
+
           break;
       }
     }
@@ -73,6 +106,18 @@ document.addEventListener("DOMContentLoaded", function () {
   function appendItem(el) {
     // create item
     const tempItem = document.createElement("div");
+    tempItem.addEventListener("click", (e) => {
+      parsedItems = parse("items");
+      let state = e.currentTarget.children[0].checked;
+      e.currentTarget.children[0].checked = !state;
+
+      const key = parsedItems.find((item) => item.id == e.currentTarget.id);
+      const index = parsedItems.indexOf(key);
+
+      parsedItems[index].status = e.currentTarget.children[0].checked;
+      writeLS("items", `${JSON.stringify(parsedItems)}`);
+      counter();
+    });
     tempItem.className = "app__item";
     tempItem.id = el.id;
 
@@ -81,6 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
     checkbox.type = "checkbox";
     checkbox.id = "label-" + el.id;
     checkbox.checked = el.status;
+    checkbox.classList = "visually-hidden";
     checkbox.addEventListener("change", (e) => {
       parsedItems = parse("items");
       const key = parsedItems.find(
@@ -94,9 +140,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     tempItem.append(checkbox);
     // and lable
+    const check = document.createElement("div");
+    check.classList = "check";
+
     const label = document.createElement("label");
     label.htmlFor = "label-" + el.id;
     label.innerText = el.value;
+    label.append(check);
     tempItem.append(label);
 
     // add delBtn
@@ -111,7 +161,6 @@ document.addEventListener("DOMContentLoaded", function () {
       );
       parsedItems.splice(parsedItems.indexOf(key), 1);
       writeLS("items", JSON.stringify(parsedItems));
-
       e.target.parentElement.remove();
     });
 
@@ -120,6 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // append to list
     if (document.contains(document.getElementById("app__item-list"))) {
       itemList.append(tempItem);
+      counter();
     }
 
     return (checkboxes = document.querySelectorAll("div.app__item input"));
@@ -135,16 +185,19 @@ document.addEventListener("DOMContentLoaded", function () {
   //   validation();
   // });
 
-  allFilter.addEventListener("click", () => {
+  allFilter.addEventListener("click", (e) => {
     filter("all");
+    checkFilter(e);
   });
 
-  completedFilter.addEventListener("click", () => {
+  completedFilter.addEventListener("click", (e) => {
     filter("completed");
+    checkFilter(e);
   });
 
-  activeFilter.addEventListener("click", () => {
+  activeFilter.addEventListener("click", (e) => {
     filter("active");
+    checkFilter(e);
   });
 
   clearBtn.addEventListener("click", () => {
@@ -153,7 +206,6 @@ document.addEventListener("DOMContentLoaded", function () {
     parsedItems = parse("items");
 
     parsedItems = parsedItems.filter((item) => !item.status);
-    console.log(parsedItems);
     writeLS("items", JSON.stringify(parsedItems));
     checkStorage();
     filter(readLS("filter"));
@@ -181,6 +233,7 @@ document.addEventListener("DOMContentLoaded", function () {
         filter(readLS("filter"));
       }
 
+      counter();
       input.value = "";
     }
   }
