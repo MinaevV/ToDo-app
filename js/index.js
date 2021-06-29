@@ -6,7 +6,6 @@ const delBtn = document.getElementById("del");
 const clearBtn = document.getElementById("clear");
 let count = document.getElementById("app__item-count");
 let filterList = document.querySelectorAll(".app__filters > *");
-let listHeight = `${itemList.offsetHeight}px`;
 
 const allFilter = document.getElementById("all");
 const completedFilter = document.getElementById("completed");
@@ -114,7 +113,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const key = parsedItems.find((item) => item.id == e.currentTarget.id);
       const index = parsedItems.indexOf(key);
 
-      parsedItems[index].status = e.currentTarget.children[0].checked;
+      try {
+        parsedItems[index].status = e.currentTarget.children[0].checked;
+      } catch (e) {}
       writeLS("items", `${JSON.stringify(parsedItems)}`);
       counter();
     });
@@ -160,8 +161,11 @@ document.addEventListener("DOMContentLoaded", function () {
         (item) => item.id == e.target.parentElement.id
       );
       parsedItems.splice(parsedItems.indexOf(key), 1);
+
       writeLS("items", JSON.stringify(parsedItems));
       e.target.parentElement.remove();
+      setHeight();
+
     });
 
     tempItem.append(delBtn);
@@ -169,15 +173,21 @@ document.addEventListener("DOMContentLoaded", function () {
     // append to list
     if (document.contains(document.getElementById("app__item-list"))) {
       itemList.append(tempItem);
+
       counter();
     }
-
     return (checkboxes = document.querySelectorAll("div.app__item input"));
+  }
+
+  function setHeight() {
+    itemList.setAttribute("style", `height: auto`);
+    itemList.setAttribute("style", `height: ${itemList.offsetHeight}px`);
   }
 
   app.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       validation();
+      setHeight();
     }
   });
 
@@ -208,6 +218,8 @@ document.addEventListener("DOMContentLoaded", function () {
     parsedItems = parsedItems.filter((item) => !item.status);
     writeLS("items", JSON.stringify(parsedItems));
     checkStorage();
+    setHeight();
+
     filter(readLS("filter"));
   });
 
@@ -230,10 +242,12 @@ document.addEventListener("DOMContentLoaded", function () {
         parsedItems.push(tempObj);
         writeLS("items", JSON.stringify(parsedItems));
         appendItem(tempObj);
+
         filter(readLS("filter"));
       }
 
       counter();
+
       input.value = "";
     }
   }
