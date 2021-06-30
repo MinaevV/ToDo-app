@@ -165,7 +165,6 @@ document.addEventListener("DOMContentLoaded", function () {
       writeLS("items", JSON.stringify(parsedItems));
       e.target.parentElement.remove();
       setHeight();
-
     });
 
     tempItem.append(delBtn);
@@ -201,11 +200,13 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   completedFilter.addEventListener("click", (e) => {
+    setHeight();
     filter("completed");
     checkFilter(e);
   });
 
   activeFilter.addEventListener("click", (e) => {
+    setHeight();
     filter("active");
     checkFilter(e);
   });
