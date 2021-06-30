@@ -20,33 +20,47 @@
               id="app__input"
               placeholder="What needs to be done?"
             />
-            <!-- <input type="button" value="Add" id="add" /> -->
           </fieldset>
 
-          <div id="app__item-list" class="app__item-list">
-          </div>
+          <div id="app__item-list" class="app__item-list"></div>
 
           <div class="app__controls">
-          <div id="app__item-count"></div>
-            
-          <div class="app__filters">
-            <input type="button" name="filter" value="All" id="all" />
-            <input type="button" name="filter" value="Completed" id="completed" />
-            <input type="button" name="filter" value="Active" id="active" />
+            <div id="app__item-count"></div>
+
+            <div class="app__filters">
+              <input type="button" name="filter" value="All" id="all" />
+              <input
+                type="button"
+                name="filter"
+                value="Completed"
+                id="completed"
+              />
+              <input type="button" name="filter" value="Active" id="active" />
+            </div>
+
+            <input
+              type="button"
+              name="clear"
+              value="Clear completed"
+              id="clear"
+            />
           </div>
-
-          <input 
-            type="button"
-            name="clear"
-            value="Clear completed"
-            id="clear"
-          >
-        </div>
-
-        </div>
         </div>
       </div>
     </div>
+
+    <div class="popup">
+      <div class="popup-inner">
+        <h2>Change your item</h2>
+        <input
+          placeholder="Change text"
+          type="text"
+          name="changeVal"
+          id="changeVal"
+        />
+      </div>
+    </div>
+
     <script src="/js/index.js"></script>
   </body>
 </html>

@@ -7,6 +7,11 @@ const clearBtn = document.getElementById("clear");
 let count = document.getElementById("app__item-count");
 let filterList = document.querySelectorAll(".app__filters > *");
 
+let popup = document.querySelector(".popup");
+let popupInner = document.querySelector(".popup-inner");
+let changeVal = document.getElementById("changeVal");
+let tossed;
+
 const allFilter = document.getElementById("all");
 const completedFilter = document.getElementById("completed");
 const activeFilter = document.getElementById("active");
@@ -27,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         appendItem(el);
       });
       counter();
+      checkHeight();
     }
   }
 
@@ -105,50 +111,48 @@ document.addEventListener("DOMContentLoaded", function () {
   function appendItem(el) {
     // create item
     const tempItem = document.createElement("div");
-    tempItem.addEventListener("click", (e) => {
-      parsedItems = parse("items");
-      let state = e.currentTarget.children[0].checked;
-      e.currentTarget.children[0].checked = !state;
 
-      const key = parsedItems.find((item) => item.id == e.currentTarget.id);
-      const index = parsedItems.indexOf(key);
-
-      try {
-        parsedItems[index].status = e.currentTarget.children[0].checked;
-      } catch (e) {}
-      writeLS("items", `${JSON.stringify(parsedItems)}`);
-      counter();
-    });
     tempItem.className = "app__item";
     tempItem.id = el.id;
+    tempItem.addEventListener('click', (e) => {
+      e.target.children[0].checked = !e.target.children[0].checked;
+
+      parsedItems = parse("items");
+      let i = parsedItems.findIndex((item) => 
+        item.id == e.target.id
+      );
+      parsedItems[i].status = e.target.children[0].checked
+      writeLS("items", JSON.stringify(parsedItems));
+
+    })
 
     // fill item with checkbox
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
-    checkbox.id = "label-" + el.id;
     checkbox.checked = el.status;
     checkbox.classList = "visually-hidden";
-    checkbox.addEventListener("change", (e) => {
-      parsedItems = parse("items");
-      const key = parsedItems.find(
-        (item) => item.id == e.target.parentElement.id
-      );
-      const index = parsedItems.indexOf(key);
-      parsedItems[index].status = e.target.checked;
 
-      writeLS("items", `${JSON.stringify(parsedItems)}`);
-      filter(readLS("filter"));
-    });
     tempItem.append(checkbox);
     // and lable
     const check = document.createElement("div");
     check.classList = "check";
+    check.addEventListener("click", (e) => {
+      e.target.parentElement.parentElement.children[0].checked =
+        !e.target.parentElement.parentElement.children[0].checked;
 
-    const label = document.createElement("label");
-    label.htmlFor = "label-" + el.id;
-    label.innerText = el.value;
-    label.append(check);
-    tempItem.append(label);
+      parsedItems = parse("items");
+      let i = parsedItems.findIndex((item) => 
+        item.id == e.target.parentElement.parentElement.id
+      );
+      parsedItems[i].status = e.target.parentElement.parentElement.children[0].checked;
+      writeLS("items", JSON.stringify(parsedItems));
+    });
+
+    const text = document.createElement("span");
+    text.innerText = el.value;
+
+    text.append(check);
+    tempItem.append(text);
 
     // add delBtn
     const delBtn = document.createElement("div");
@@ -164,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       writeLS("items", JSON.stringify(parsedItems));
       e.target.parentElement.remove();
-      setHeight();
+      checkHeight();
     });
 
     tempItem.append(delBtn);
@@ -172,21 +176,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // append to list
     if (document.contains(document.getElementById("app__item-list"))) {
       itemList.append(tempItem);
+      checkHeight();
 
       counter();
     }
     return (checkboxes = document.querySelectorAll("div.app__item input"));
   }
 
-  function setHeight() {
-    itemList.setAttribute("style", `height: auto`);
-    itemList.setAttribute("style", `height: ${itemList.offsetHeight}px`);
-  }
-
   app.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       validation();
-      setHeight();
+      checkHeight();
     }
   });
 
@@ -200,14 +200,13 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   completedFilter.addEventListener("click", (e) => {
-    setHeight();
     filter("completed");
     checkFilter(e);
   });
 
   activeFilter.addEventListener("click", (e) => {
-    setHeight();
     filter("active");
+
     checkFilter(e);
   });
 
@@ -219,13 +218,13 @@ document.addEventListener("DOMContentLoaded", function () {
     parsedItems = parsedItems.filter((item) => !item.status);
     writeLS("items", JSON.stringify(parsedItems));
     checkStorage();
-    setHeight();
-
+    checkHeight();
     filter(readLS("filter"));
   });
 
   function validation() {
-    if (input.value.length) {
+    const inputField = input.value.trim();
+    if (inputField.length) {
       const val = input.value;
       const stamp = Date.now();
       const status = false;
@@ -250,7 +249,13 @@ document.addEventListener("DOMContentLoaded", function () {
       counter();
 
       input.value = "";
+    } else {
+      input.value = "";
     }
+  }
+
+  function toss(val) {
+    tossed = val;
   }
 
   function parse(item) {
@@ -266,4 +271,45 @@ document.addEventListener("DOMContentLoaded", function () {
   function readLS(el) {
     return localStorage.getItem(el);
   }
+
+  function checkHeight() {
+    if (itemList.scrollHeight > 500) {
+      itemList.classList.add("__scrolling");
+    } else {
+      itemList.classList.remove("__scrolling");
+    }
+  }
+
+  popup.addEventListener("click", (e) => {
+    if (e.currentTarget === e.target) {
+      popup.classList.remove("__active");
+    }
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && popup.classList.contains("__active")) {
+      popup.classList.remove("__active");
+      changeVal.value = "";
+    }
+  });
+
+  changeVal.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const tempVal = changeVal.value.trim();
+      if (tempVal.length) {
+        parsedItems = parse("items");
+        let i = parsedItems.findIndex((item) => item.id == tossed);
+        changeVal.value = parsedItems[i].value;
+        parsedItems[i].value = tempVal;
+        console.log(parsedItems[i].value);
+
+        writeLS("items", `${JSON.stringify(parsedItems)}`);
+        changeVal.value = "";
+        popup.classList.remove("__active");
+        itemList.innerHTML = "";
+
+        checkStorage();
+      }
+    }
+  });
 });
