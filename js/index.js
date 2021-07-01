@@ -25,6 +25,82 @@ document.addEventListener("DOMContentLoaded", function () {
     filter();
   }
 
+  //
+  // Functions
+  //
+
+  function appendItem(el) {
+    // create item
+    const tempItem = document.createElement("div");
+
+    tempItem.className = "app__item";
+    tempItem.id = el.id;
+    // change item state by single click
+    tempItem.addEventListener("click", (e) => {
+      if (e.target.tagName != "SPAN" && e.target.id != "del") {
+        e.target.children[0].checked = !e.target.children[0].checked;
+
+        parsedItems = parse("items");
+        let i = parsedItems.findIndex((item) => item.id == e.target.id);
+        parsedItems[i].status = e.target.children[0].checked;
+        writeLS("items", JSON.stringify(parsedItems));
+      }
+    });
+
+    // fill item with checkbox
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = el.status;
+    checkbox.classList = "visually-hidden";
+
+    tempItem.append(checkbox);
+    // and lable
+    const check = document.createElement("div");
+    check.classList = "check";
+
+    const text = document.createElement("span");
+    // call popup for item value change
+    text.addEventListener("dblclick", (e) => {
+      popup.classList.add("__active");
+      toss(e.target.innerText);
+      changeVal.value = tossed;
+      changeVal.focus();
+    });
+    text.innerText = el.value;
+
+    text.append(check);
+    tempItem.append(text);
+
+    // add delBtn
+    const delBtn = document.createElement("div");
+    delBtn.id = "del";
+    delBtn.className = "app__delete-item";
+    delBtn.innerText = "×";
+    // delete item on 'cross' click
+    delBtn.addEventListener("click", (e) => {
+      parsedItems = parse("items");
+      const key = parsedItems.find(
+        (item) => item.id == e.target.parentElement.id
+      );
+      parsedItems.splice(parsedItems.indexOf(key), 1);
+
+      writeLS("items", JSON.stringify(parsedItems));
+      e.target.parentElement.remove();
+      checkHeight();
+    });
+
+    tempItem.append(delBtn);
+
+    // append to list
+    if (document.contains(document.getElementById("app__item-list"))) {
+      itemList.append(tempItem);
+      checkHeight();
+
+      counter();
+    }
+    return (checkboxes = document.querySelectorAll("div.app__item input"));
+  }
+
   function checkStorage() {
     if (readLS("items")) {
       parsedItems = parse("items");
@@ -34,30 +110,6 @@ document.addEventListener("DOMContentLoaded", function () {
       counter();
       checkHeight();
     }
-  }
-
-  function counter() {
-    if (readLS("items")) {
-      let i = 0;
-      parsedItems = parse("items");
-      parsedItems.forEach((item) => {
-        if (!item.status) {
-          ++i;
-        }
-      });
-      count.innerHTML = `${i} left`;
-    } else {
-      count.innerHTML = "0 left";
-    }
-  }
-
-  function checkFilter(e) {
-    filterList.forEach((item) => {
-      item.classList.remove("__active");
-      if (item === e.currentTarget) {
-        item.classList.add("__active");
-      }
-    });
   }
 
   function filter(passed) {
@@ -108,120 +160,32 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function appendItem(el) {
-    // create item
-    const tempItem = document.createElement("div");
-
-    tempItem.className = "app__item";
-    tempItem.id = el.id;
-    tempItem.addEventListener('click', (e) => {
-      e.target.children[0].checked = !e.target.children[0].checked;
-
-      parsedItems = parse("items");
-      let i = parsedItems.findIndex((item) => 
-        item.id == e.target.id
-      );
-      parsedItems[i].status = e.target.children[0].checked
-      writeLS("items", JSON.stringify(parsedItems));
-
-    })
-
-    // fill item with checkbox
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = el.status;
-    checkbox.classList = "visually-hidden";
-
-    tempItem.append(checkbox);
-    // and lable
-    const check = document.createElement("div");
-    check.classList = "check";
-    check.addEventListener("click", (e) => {
-      e.target.parentElement.parentElement.children[0].checked =
-        !e.target.parentElement.parentElement.children[0].checked;
-
-      parsedItems = parse("items");
-      let i = parsedItems.findIndex((item) => 
-        item.id == e.target.parentElement.parentElement.id
-      );
-      parsedItems[i].status = e.target.parentElement.parentElement.children[0].checked;
-      writeLS("items", JSON.stringify(parsedItems));
+  function checkFilter(e) {
+    filterList.forEach((item) => {
+      item.classList.remove("__active");
+      if (item === e.currentTarget) {
+        item.classList.add("__active");
+      }
     });
-
-    const text = document.createElement("span");
-    text.innerText = el.value;
-
-    text.append(check);
-    tempItem.append(text);
-
-    // add delBtn
-    const delBtn = document.createElement("div");
-    delBtn.id = "del";
-    delBtn.className = "app__delete-item";
-    delBtn.innerText = "×";
-    delBtn.addEventListener("click", (e) => {
-      parsedItems = parse("items");
-      const key = parsedItems.find(
-        (item) => item.id == e.target.parentElement.id
-      );
-      parsedItems.splice(parsedItems.indexOf(key), 1);
-
-      writeLS("items", JSON.stringify(parsedItems));
-      e.target.parentElement.remove();
-      checkHeight();
-    });
-
-    tempItem.append(delBtn);
-
-    // append to list
-    if (document.contains(document.getElementById("app__item-list"))) {
-      itemList.append(tempItem);
-      checkHeight();
-
-      counter();
-    }
-    return (checkboxes = document.querySelectorAll("div.app__item input"));
   }
 
-  app.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      validation();
-      checkHeight();
+  // show remaining active tasks
+  function counter() {
+    if (readLS("items")) {
+      let i = 0;
+      parsedItems = parse("items");
+      parsedItems.forEach((item) => {
+        if (!item.status) {
+          ++i;
+        }
+      });
+      count.innerHTML = `${i} left`;
+    } else {
+      count.innerHTML = "0 left";
     }
-  });
+  }
 
-  // addBtn.addEventListener("click", (e) => {
-  //   validation();
-  // });
-
-  allFilter.addEventListener("click", (e) => {
-    filter("all");
-    checkFilter(e);
-  });
-
-  completedFilter.addEventListener("click", (e) => {
-    filter("completed");
-    checkFilter(e);
-  });
-
-  activeFilter.addEventListener("click", (e) => {
-    filter("active");
-
-    checkFilter(e);
-  });
-
-  clearBtn.addEventListener("click", () => {
-    itemList.innerHTML = "";
-
-    parsedItems = parse("items");
-
-    parsedItems = parsedItems.filter((item) => !item.status);
-    writeLS("items", JSON.stringify(parsedItems));
-    checkStorage();
-    checkHeight();
-    filter(readLS("filter"));
-  });
-
+  // validate before adding to list
   function validation() {
     const inputField = input.value.trim();
     if (inputField.length) {
@@ -254,6 +218,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  //pass values between functions and event handlers
   function toss(val) {
     tossed = val;
   }
@@ -272,6 +237,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return localStorage.getItem(el);
   }
 
+  // scroll list if its height more than 500px
   function checkHeight() {
     if (itemList.scrollHeight > 500) {
       itemList.classList.add("__scrolling");
@@ -280,12 +246,26 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  //
+  // Eevnt handlers
+  //
+
+  // add item on 'Enter' hit
+  app.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      validation();
+      checkHeight();
+    }
+  });
+
+  // close popup on side click
   popup.addEventListener("click", (e) => {
     if (e.currentTarget === e.target) {
       popup.classList.remove("__active");
     }
   });
 
+  // close popup on 'Esc' hit
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && popup.classList.contains("__active")) {
       popup.classList.remove("__active");
@@ -293,15 +273,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
+  // save new value of item on 'Enter' hit
   changeVal.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       const tempVal = changeVal.value.trim();
       if (tempVal.length) {
         parsedItems = parse("items");
-        let i = parsedItems.findIndex((item) => item.id == tossed);
+        let i = parsedItems.findIndex((item) => item.value == tossed);
         changeVal.value = parsedItems[i].value;
         parsedItems[i].value = tempVal;
-        console.log(parsedItems[i].value);
 
         writeLS("items", `${JSON.stringify(parsedItems)}`);
         changeVal.value = "";
@@ -311,5 +291,37 @@ document.addEventListener("DOMContentLoaded", function () {
         checkStorage();
       }
     }
+  });
+
+  // filter by ALL tasks
+  allFilter.addEventListener("click", (e) => {
+    filter("all");
+    checkFilter(e);
+  });
+
+  // filter by COMPLETED tasks
+  completedFilter.addEventListener("click", (e) => {
+    filter("completed");
+    checkFilter(e);
+  });
+
+  // filter by ACTIVE tasks
+  activeFilter.addEventListener("click", (e) => {
+    filter("active");
+
+    checkFilter(e);
+  });
+
+  // clear completed tasks
+  clearBtn.addEventListener("click", () => {
+    itemList.innerHTML = "";
+
+    parsedItems = parse("items");
+
+    parsedItems = parsedItems.filter((item) => !item.status);
+    writeLS("items", JSON.stringify(parsedItems));
+    checkStorage();
+    checkHeight();
+    filter(readLS("filter"));
   });
 });
