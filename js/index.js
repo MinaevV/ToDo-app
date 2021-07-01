@@ -66,8 +66,8 @@ document.addEventListener("DOMContentLoaded", function () {
     text.addEventListener("dblclick", (e) => {
       if (e.target.tagName == "SPAN") {
         popup.classList.add("__active");
-        toss(e.target.innerText);
-        changeVal.value = tossed;
+        toss(e.target.parentElement.id);
+        changeVal.value = e.target.innerText;
         changeVal.focus();
       }
     });
@@ -284,7 +284,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const tempVal = changeVal.value.trim();
       if (tempVal.length) {
         parsedItems = parse("items");
-        let i = parsedItems.findIndex((item) => item.value == tossed);
+        let i = parsedItems.findIndex((item) => item.id == tossed);
         changeVal.value = parsedItems[i].value;
         parsedItems[i].value = tempVal;
 
