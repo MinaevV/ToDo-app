@@ -177,6 +177,7 @@ body {
 .app__item span {
   position: relative;
   margin-left: 1.5em;
+  user-select: none;
 
   cursor: pointer;
 }
@@ -197,6 +198,7 @@ body {
   opacity: 0;
 
   transition: 0.2s ease-in-out 0.1s;
+  user-select: none;
 }
 
 .app__item:hover > .app__delete-item {
@@ -217,7 +219,6 @@ body {
   background-color: transparent;
   box-shadow: 0 0 0 2px darkgrey;
 
-  pointer-events: none;
   cursor: pointer;
 }
 

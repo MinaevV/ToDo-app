@@ -35,17 +35,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     tempItem.className = "app__item";
     tempItem.id = el.id;
-    // change item state by single click
-    tempItem.addEventListener("click", (e) => {
-      if (e.target.tagName != "SPAN" && e.target.id != "del") {
-        e.target.children[0].checked = !e.target.children[0].checked;
-
-        parsedItems = parse("items");
-        let i = parsedItems.findIndex((item) => item.id == e.target.id);
-        parsedItems[i].status = e.target.children[0].checked;
-        writeLS("items", JSON.stringify(parsedItems));
-      }
-    });
 
     // fill item with checkbox
     const checkbox = document.createElement("input");
@@ -57,14 +46,30 @@ document.addEventListener("DOMContentLoaded", function () {
     // and lable
     const check = document.createElement("div");
     check.classList = "check";
+    check.addEventListener("click", (e) => {
+      if (e.target.classList == "check") {
+        e.target.parentElement.parentElement.children[0].checked =
+          !e.target.parentElement.parentElement.children[0].checked;
+
+        parsedItems = parse("items");
+        let i = parsedItems.findIndex(
+          (item) => item.id == e.target.parentElement.parentElement.id
+        );
+        parsedItems[i].status =
+          e.target.parentElement.parentElement.children[0].checked;
+        writeLS("items", JSON.stringify(parsedItems));
+      }
+    });
 
     const text = document.createElement("span");
     // call popup for item value change
     text.addEventListener("dblclick", (e) => {
-      popup.classList.add("__active");
-      toss(e.target.innerText);
-      changeVal.value = tossed;
-      changeVal.focus();
+      if (e.target.tagName == "SPAN") {
+        popup.classList.add("__active");
+        toss(e.target.innerText);
+        changeVal.value = tossed;
+        changeVal.focus();
+      }
     });
     text.innerText = el.value;
 
