@@ -255,20 +255,6 @@ input {
   font-family: inherit;
   font-size: inherit;
 }
-/* 
-input[type="button"] {
-  padding: 5px 15px;
-  border: 0;
-  border-radius: 4px;
-
-  background-color: #999;
-
-  transition: 0.2s ease-in-out;
-} */
-
-/* input[type="button"]#add {
-  border-radius: 0 4px 4px 0;
-} */
 
 .app__filters {
   max-width: 200px;
