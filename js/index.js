@@ -1,23 +1,23 @@
-const app = document.getElementById('app');
-const input = document.getElementById('app__input');
-const itemList = document.getElementById('app__item-list');
-const addBtn = document.getElementById('add');
-const delBtn = document.getElementById('del');
-const clearBtn = document.getElementById('clear');
-let count = document.getElementById('app__item-count');
-let filterList = document.querySelectorAll('.app__filters > *');
+const app = document.getElementById("app");
+const input = document.getElementById("app__input");
+const itemList = document.getElementById("app__item-list");
+const addBtn = document.getElementById("add");
+const delBtn = document.getElementById("del");
+const clearBtn = document.getElementById("clear");
+let count = document.getElementById("app__item-count");
+let filterList = document.querySelectorAll(".app__filters > *");
 
-let popup = document.querySelector('.popup');
-let popupInner = document.querySelector('.popup-inner');
-let changeVal = document.getElementById('changeVal');
+let popup = document.querySelector(".popup");
+let popupInner = document.querySelector(".popup-inner");
+let changeVal = document.getElementById("changeVal");
 let tossed;
 let valueToEdit;
 
-const allFilter = document.getElementById('all');
-const completedFilter = document.getElementById('completed');
-const activeFilter = document.getElementById('active');
+const allFilter = document.getElementById("all");
+const completedFilter = document.getElementById("completed");
+const activeFilter = document.getElementById("active");
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener("DOMContentLoaded", function () {
   //
   // Functions
   //
@@ -25,8 +25,8 @@ document.addEventListener('DOMContentLoaded', function () {
   loadFromStorage();
 
   function createCheckbox(state) {
-    const item = document.createElement('input');
-    item.type = 'checkbox';
+    const item = document.createElement("input");
+    item.type = "checkbox";
     if (state) {
       item.checked = state;
     }
@@ -34,21 +34,21 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function createCheckmarker() {
-    const item = document.createElement('div');
-    item.classList.add('check');
+    const item = document.createElement("div");
+    item.classList.add("check");
     return item;
   }
 
   function createDelBtn() {
-    const item = document.createElement('div');
-    item.id = 'del';
-    item.classList.add('app__delete-item');
-    item.innerText = '×';
+    const item = document.createElement("div");
+    item.id = "del";
+    item.classList.add("app__delete-item");
+    item.innerText = "×";
     return item;
   }
 
   function createSpan(value, id) {
-    const item = document.createElement('span');
+    const item = document.createElement("span");
     item.id = `span-${id}`;
     item.innerText = value;
 
@@ -56,31 +56,31 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function toggleCheckbox(e) {
-    if (e.target.classList == 'check') {
+    if (e.target.classList == "check") {
       const id = e.target.parentElement.parentElement.id;
       const parent = e.target.parentElement.parentElement;
       parent.firstElementChild.checked ^= true;
 
-      parsedItems = parse('items');
+      parsedItems = parse("items");
       let i = parsedItems.findIndex((item) => item.id == id);
       parsedItems[i].status = parent.firstElementChild.checked;
-      writeLS('items', JSON.stringify(parsedItems));
+      writeLS("items", JSON.stringify(parsedItems));
     }
   }
 
   function deleteItem(e) {
-    parsedItems = parse('items');
+    parsedItems = parse("items");
     const i = parsedItems.findIndex(
       (item) => item.id == e.target.parentElement.id
     );
     parsedItems.splice(i, 1);
     e.target.parentElement.remove();
-    writeLS('items', JSON.stringify(parsedItems));
+    writeLS("items", JSON.stringify(parsedItems));
   }
 
   function createItem(id) {
-    const item = document.createElement('div');
-    item.classList.add('app__item');
+    const item = document.createElement("div");
+    item.classList.add("app__item");
     item.id = id;
 
     return item;
@@ -99,22 +99,23 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function addItemListeners(item) {
-    const checkbox = item.querySelector('.check');
-    const deleteBtn = item.querySelector('#del');
-    const span = item.querySelector('span');
-
-    checkbox.addEventListener('click', (e) => {
+    const checkbox = item.querySelector(".check");
+    checkbox.addEventListener("click", (e) => {
       toggleCheckbox(e);
       counter();
-      filter(readLS('filter'));
+      filter(readLS("filter"));
     });
 
-    deleteBtn.addEventListener('click', (e) => {
+    const deleteBtn = item.querySelector("#del");
+    deleteBtn.addEventListener("click", (e) => {
       deleteItem(e);
       counter();
     });
 
-    span.addEventListener('dblclick', (e) => {
+    const span = item.querySelector("span");
+    console.log(span);
+
+    span.addEventListener("dblclick", (e) => {
       openEditField(e);
     });
 
@@ -130,67 +131,67 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function loadFromStorage() {
-    if (readLS('items')) {
-      parsedItems = parse('items');
+    if (readLS("items")) {
+      parsedItems = parse("items");
       parsedItems.forEach((el) => {
         const item = createListNode(el.id, el.status, el.value);
 
         appendItem(addItemListeners(item), itemList);
       });
-      filter(readLS('filter'));
+      filter(readLS("filter"));
       counter();
       checkHeight();
     }
   }
 
   function filter(passed) {
-    let itemsInList = document.querySelectorAll('.app__item');
+    let itemsInList = document.querySelectorAll(".app__item");
     switch (passed) {
-      case 'all':
-        itemsInList.forEach((item) => (item.style.display = 'flex'));
-        allFilter.classList.add('__active');
-        return writeLS('filter', 'all');
+      case "all":
+        itemsInList.forEach((item) => (item.style.display = "flex"));
+        allFilter.classList.add("__active");
+        return writeLS("filter", "all");
 
-      case 'completed':
-        itemsInList.forEach((item) => (item.style.display = 'flex'));
+      case "completed":
+        itemsInList.forEach((item) => (item.style.display = "flex"));
         itemsInList.forEach((item) => {
           if (!item.firstChild.checked) {
-            item.style.display = 'none';
-            completedFilter.classList.add('__active');
+            item.style.display = "none";
+            completedFilter.classList.add("__active");
           }
         });
-        return writeLS('filter', 'completed');
+        return writeLS("filter", "completed");
 
-      case 'active':
-        itemsInList.forEach((item) => (item.style.display = 'flex'));
+      case "active":
+        itemsInList.forEach((item) => (item.style.display = "flex"));
         itemsInList.forEach((item) => {
           if (item.firstChild.checked) {
-            item.style.display = 'none';
+            item.style.display = "none";
           }
         });
-        activeFilter.classList.add('__active');
-        return writeLS('filter', 'active');
+        activeFilter.classList.add("__active");
+        return writeLS("filter", "active");
 
       default:
-        allFilter.classList.add('__active');
-        return writeLS('filter', 'all');
+        allFilter.classList.add("__active");
+        return writeLS("filter", "all");
     }
   }
 
   function applyFilter(e) {
     filterList.forEach((item) => {
-      item.classList.remove('__active');
+      item.classList.remove("__active");
       if (item === e.currentTarget) {
-        item.classList.add('__active');
+        item.classList.add("__active");
       }
     });
   }
 
   // show remaining active tasks
   function counter() {
-    if (readLS('items')) {
+    if (readLS("items")) {
       let i = 0;
-      parsedItems = parse('items');
+      parsedItems = parse("items");
       parsedItems.forEach((item) => {
         if (!item.status) {
           ++i;
@@ -198,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       count.innerHTML = `${i} left`;
     } else {
-      count.innerHTML = '0 left';
+      count.innerHTML = "0 left";
     }
   }
 
@@ -214,15 +215,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
       appendItem(addItemListeners(item), itemList);
 
-      if (!readLS('items')) {
-        writeLS('items', JSON.stringify([tempObj]));
+      if (!readLS("items")) {
+        writeLS("items", JSON.stringify([tempObj]));
       } else {
-        parsedItems = parse('items');
+        parsedItems = parse("items");
         parsedItems.push(tempObj);
-        writeLS('items', JSON.stringify(parsedItems));
+        writeLS("items", JSON.stringify(parsedItems));
       }
-      input.value = '';
-      filter(readLS('filter'));
+      input.value = "";
+      filter(readLS("filter"));
     }
   }
 
@@ -248,16 +249,16 @@ document.addEventListener('DOMContentLoaded', function () {
   // scroll list if its height more than 500px
   function checkHeight() {
     if (itemList.scrollHeight > 500) {
-      itemList.classList.add('__scrolling');
+      itemList.classList.add("__scrolling");
     } else {
-      itemList.classList.remove('__scrolling');
+      itemList.classList.remove("__scrolling");
     }
   }
 
   // call popup for item value change
   function openEditField(e) {
-    if (e.target.tagName == 'SPAN') {
-      popup.classList.add('__active');
+    if (e.target.tagName == "SPAN") {
+      popup.classList.add("__active");
       toss(e.target.parentElement.id);
       changeVal.focus();
       changeVal.value = e.target.innerText;
@@ -270,8 +271,8 @@ document.addEventListener('DOMContentLoaded', function () {
   //
 
   // add item on 'Enter' hit
-  app.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
+  app.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
       validation();
       checkHeight();
       counter();
@@ -279,65 +280,77 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // close popup on side click
-  popup.addEventListener('click', (e) => {
+  popup.addEventListener("click", (e) => {
     if (e.currentTarget === e.target) {
-      popup.classList.remove('__active');
+      popup.classList.remove("__active");
     }
   });
 
   // close popup on 'Esc' hit
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && popup.classList.contains('__active')) {
-      popup.classList.remove('__active');
-      changeVal.value = '';
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && popup.classList.contains("__active")) {
+      popup.classList.remove("__active");
+      changeVal.value = "";
     }
   });
 
   // save new value of item on 'Enter' hit
-  changeVal.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
+  changeVal.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
       const tempVal = changeVal.value.trim();
       if (tempVal.length) {
-        parsedItems = parse('items');
+        parsedItems = parse("items");
         let i = parsedItems.findIndex((item) => item.id == tossed);
         changeVal.value = parsedItems[i].value;
         parsedItems[i].value = tempVal;
 
-        writeLS('items', `${JSON.stringify(parsedItems)}`);
-        changeVal.value = '';
-        popup.classList.remove('__active');
+        writeLS("items", `${JSON.stringify(parsedItems)}`);
+        changeVal.value = "";
+        popup.classList.remove("__active");
 
-        let a = document.getElementById(`${valueToEdit}`);
-        a = tempVal;
+        document.querySelector(`#span-${tossed}`).remove();
+        const span = createSpan(tempVal, tossed);
+        const checkbox = createCheckmarker();
+        checkbox.addEventListener("click", (e) => {
+          toggleCheckbox(e);
+          counter();
+          filter(readLS("filter"));
+        });
+        appendItem(checkbox, span);
+
+        span.addEventListener("dblclick", (e) => {
+          openEditField(e);
+        });
+        appendItem(span, itemList.children[i]);
       }
     }
   });
 
   // filter by ALL tasks
-  allFilter.addEventListener('click', (e) => {
-    filter('all');
+  allFilter.addEventListener("click", (e) => {
+    filter("all");
     applyFilter(e);
   });
 
   // filter by COMPLETED tasks
-  completedFilter.addEventListener('click', (e) => {
-    filter('completed');
+  completedFilter.addEventListener("click", (e) => {
+    filter("completed");
     applyFilter(e);
   });
 
   // filter by ACTIVE tasks
-  activeFilter.addEventListener('click', (e) => {
-    filter('active');
+  activeFilter.addEventListener("click", (e) => {
+    filter("active");
 
     applyFilter(e);
   });
 
   // clear completed tasks
-  clearBtn.addEventListener('click', () => {
-    let itemsToDelete = document.querySelectorAll('.app__item');
-    parsedItems = parse('items');
+  clearBtn.addEventListener("click", () => {
+    let itemsToDelete = document.querySelectorAll(".app__item");
+    parsedItems = parse("items");
     parsedItems = parsedItems.filter((item) => !item.status);
-    writeLS('items', JSON.stringify(parsedItems));
+    writeLS("items", JSON.stringify(parsedItems));
 
     parsedItems = itemsToDelete.forEach((item) => {
       if (item.firstElementChild.checked) {
